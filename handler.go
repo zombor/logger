@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os/exec"
-	"strings"
 )
 
 type handler struct {
@@ -20,38 +18,9 @@ func NewHandler(couchUrl string, workQueue chan string) handler {
 }
 
 func (h handler) Handle(res http.ResponseWriter, req *http.Request) {
-	//var inputJson map[string]string
-	//_ = json.NewDecoder(req.Body).Decode(&inputJson)
-
 	body, _ := ioutil.ReadAll(req.Body)
 
 	h.workQueue <- string(body)
-}
-
-var worker = func(ch chan string) {
-	for {
-		input, ok := <-ch
-
-		if !ok {
-			return
-		}
-
-		uuid, _ := exec.Command("uuidgen").Output()
-
-		remoteReq, _ := http.NewRequest(
-			"PUT",
-			fmt.Sprintf("http://localhost:5984/logs/%s", uuid),
-			strings.NewReader(input),
-		)
-
-		remoteRes, err := (&http.Client{}).Do(remoteReq)
-
-		if err != nil {
-			println(err.Error())
-		}
-
-		fmt.Printf("%#v\n", remoteRes)
-	}
 }
 
 func createDatabase(couchUrl string) {
@@ -63,6 +32,7 @@ func createDatabase(couchUrl string) {
 
 	if res.StatusCode == http.StatusNotFound {
 		req, _ = http.NewRequest("PUT", fmt.Sprintf("%slogs", couchUrl), nil)
+		//TODO: Handle these return args
 		_, _ = (&http.Client{}).Do(req)
 	}
 }
