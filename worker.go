@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var worker = func(ch chan string) {
+var worker = func(couchUrl string, ch chan string) {
 	for {
 		input, ok := <-ch
 
@@ -20,7 +20,7 @@ var worker = func(ch chan string) {
 
 		remoteReq, _ := http.NewRequest(
 			"PUT",
-			fmt.Sprintf("http://localhost:5984/logs/%s", sUuid),
+			fmt.Sprintf("%slogs/%s", couchUrl, sUuid),
 			strings.NewReader(input),
 		)
 
