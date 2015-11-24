@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -28,4 +30,21 @@ func Test_NewHandler_CreatesDatabase_IfNotExists(t *testing.T) {
 
 	assert.True(t, databaseExistsCalled)
 	assert.True(t, createDatbaseCalled)
+}
+
+func Test_handlerHandle_SendsReqBody_ToWorkQueue(t *testing.T) {
+	jsonInput := map[string]string{
+		"message": "hello world",
+	}
+	body := new(bytes.Buffer)
+	json.NewEncoder(body).Encode(jsonInput)
+	request, _ := http.NewRequest("POST", "/", body)
+	response := httptest.NewRecorder()
+
+	workQueue := make(chan string, 1)
+	handler{workQueue: workQueue}.Handle(response, request)
+
+	passedBody := <-workQueue
+
+	assert.Equal(t, "{\"message\":\"hello world\"}\n", passedBody)
 }
