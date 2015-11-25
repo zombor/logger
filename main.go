@@ -5,8 +5,8 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/zombor/logger/Godeps/_workspace/src/github.com/gorilla/handlers"
-	"github.com/zombor/logger/Godeps/_workspace/src/github.com/gorilla/mux"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	flag.Parse()
 
 	if *couchUrl == "" {
-		panic("-couchUrl is a required flag")
+		panic("-couchdb_url is a required flag")
 	}
 
 	listener, err := net.Listen("tcp", *listen)
@@ -33,12 +33,14 @@ func main() {
 	workQueue := make(chan string, 100)
 	h := NewHandler(*couchUrl, workQueue)
 
+	setupDatabase(*couchUrl)
+
 	go worker(*couchUrl, workQueue)
 
 	r := mux.NewRouter()
 	r.Handle("/", handlers.MethodHandler{
 		"POST": http.HandlerFunc(
-			h.Handle,
+			h.CreateLog,
 		),
 	})
 	http.Handle("/", r)
