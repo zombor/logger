@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/zombor/logger/Godeps/_workspace/src/github.com/nu7hatch/gouuid"
 )
@@ -16,12 +18,18 @@ var worker = func(couchUrl string, ch chan string) {
 			return
 		}
 
+		var inputJson map[string]interface{}
+		_ = json.NewDecoder(strings.NewReader(input)).Decode(&inputJson)
+		inputJson["created_at"] = time.Now().UTC()
+
+		output, _ := json.Marshal(inputJson)
+
 		uuid, _ := uuid.NewV4()
 
 		remoteReq, _ := http.NewRequest(
 			"PUT",
 			fmt.Sprintf("%slogs/%s", couchUrl, uuid.String()),
-			strings.NewReader(input),
+			strings.NewReader(string(output)),
 		)
 
 		//TODO: do something with the response?
