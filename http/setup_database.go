@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 )
@@ -17,4 +18,17 @@ func setupDatabase(couchUrl string) {
 		//TODO: Handle these return args
 		_, _ = (&http.Client{}).Do(req)
 	}
+
+	body := bytes.NewReader([]byte(`{
+		"_id": "_design/keys",
+		"views": {
+			"keys": {
+				"map": "function(doc) { for (var thing in doc) { emit(thing,1); } }",
+				"reduce": "function(key,values) { return sum(values); }"
+			}
+		}
+	}`))
+	req, _ = http.NewRequest("PUT", fmt.Sprintf("%slogs/_design/keys", couchUrl), body)
+	//TODO: Handle these return args
+	_, _ = (&http.Client{}).Do(req)
 }
