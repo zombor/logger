@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/zombor/logger/Godeps/_workspace/src/github.com/stretchr/testify/assert"
 )
 
 func Test_NewHandler_CreatesDatabase_IfNotExists(t *testing.T) {

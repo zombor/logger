@@ -5,8 +5,8 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
+	"github.com/zombor/logger/Godeps/_workspace/src/github.com/gorilla/handlers"
+	"github.com/zombor/logger/Godeps/_workspace/src/github.com/gorilla/mux"
 )
 
 func main() {
