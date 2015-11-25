@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os/exec"
 	"strings"
+
+	"github.com/zombor/logger/Godeps/_workspace/src/github.com/nu7hatch/gouuid"
 )
 
 var worker = func(couchUrl string, ch chan string) {
@@ -15,12 +16,11 @@ var worker = func(couchUrl string, ch chan string) {
 			return
 		}
 
-		uuid, _ := exec.Command("uuidgen").Output()
-		sUuid := strings.TrimSpace(string(uuid))
+		uuid, _ := uuid.NewV4()
 
 		remoteReq, _ := http.NewRequest(
 			"PUT",
-			fmt.Sprintf("%slogs/%s", couchUrl, sUuid),
+			fmt.Sprintf("%slogs/%s", couchUrl, uuid.String()),
 			strings.NewReader(input),
 		)
 
