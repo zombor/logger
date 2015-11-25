@@ -1,17 +1,18 @@
 package main
 
 import (
+	"html/template"
 	"io/ioutil"
 	"net/http"
 )
 
 type handler struct {
-	couchUrl  string
-	workQueue chan string
+	workQueue  chan string
+	repository repository
 }
 
-func NewHandler(couchUrl string, workQueue chan string) handler {
-	return handler{couchUrl: couchUrl, workQueue: workQueue}
+func NewHandler(repository repository, workQueue chan string) handler {
+	return handler{repository: repository, workQueue: workQueue}
 }
 
 func (h handler) CreateLog(res http.ResponseWriter, req *http.Request) {
@@ -21,4 +22,21 @@ func (h handler) CreateLog(res http.ResponseWriter, req *http.Request) {
 }
 
 func (h handler) Home(res http.ResponseWriter, req *http.Request) {
+	t, _ := template.New("home").Parse(tplHome)
+
+	type data struct {
+		Key   string
+		Value int
+	}
+
+	datas := []data{}
+
+	for k, v := range h.repository.AllKeys() {
+		datas = append(datas, data{
+			Key:   k,
+			Value: v,
+		})
+	}
+
+	t.Execute(res, struct{ Items []data }{datas})
 }

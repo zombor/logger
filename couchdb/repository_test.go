@@ -1,7 +1,6 @@
-package main
+package couchdb
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,7 +23,7 @@ func Test_setupDatabase_CreatesDatabase_IfNotExists(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	setupDatabase(fmt.Sprintf("%s/", ts.URL))
+	NewCouchDb(ts.URL + "/").setup()
 
 	assert.True(t, databaseExistsCalled)
 	assert.True(t, createDatbaseCalled)

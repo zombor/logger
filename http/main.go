@@ -7,6 +7,8 @@ import (
 
 	"github.com/zombor/logger/Godeps/_workspace/src/github.com/gorilla/handlers"
 	"github.com/zombor/logger/Godeps/_workspace/src/github.com/gorilla/mux"
+
+	"github.com/zombor/logger/couchdb"
 )
 
 func main() {
@@ -31,9 +33,7 @@ func main() {
 	println("listening on", listener.Addr().String())
 
 	workQueue := make(chan string, 100)
-	h := NewHandler(*couchUrl, workQueue)
-
-	setupDatabase(*couchUrl)
+	h := NewHandler(couchdb.NewCouchDb(*couchUrl), workQueue)
 
 	go worker(*couchUrl, workQueue)
 
@@ -41,6 +41,9 @@ func main() {
 	r.Handle("/", handlers.MethodHandler{
 		"POST": http.HandlerFunc(
 			h.CreateLog,
+		),
+		"GET": http.HandlerFunc(
+			h.Home,
 		),
 	})
 	http.Handle("/", r)
