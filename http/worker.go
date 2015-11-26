@@ -19,23 +19,28 @@ var worker = func(couchUrl string, ch chan string) {
 		}
 
 		var inputJson map[string]interface{}
-		_ = json.NewDecoder(strings.NewReader(input)).Decode(&inputJson)
-		inputJson["created_at"] = time.Now().UTC()
+		err := json.NewDecoder(strings.NewReader(input)).Decode(&inputJson)
 
-		output, _ := json.Marshal(inputJson)
+		if err == nil {
+			inputJson["created_at"] = time.Now().UTC()
 
-		uuid, _ := uuid.NewV4()
+			output, _ := json.Marshal(inputJson)
 
-		remoteReq, _ := http.NewRequest(
-			"PUT",
-			fmt.Sprintf("%slogs/%s", couchUrl, uuid.String()),
-			strings.NewReader(string(output)),
-		)
+			uuid, _ := uuid.NewV4()
 
-		//TODO: do something with the response?
-		_, err := (&http.Client{}).Do(remoteReq)
+			remoteReq, _ := http.NewRequest(
+				"PUT",
+				fmt.Sprintf("%slogs/%s", couchUrl, uuid.String()),
+				strings.NewReader(string(output)),
+			)
 
-		if err != nil {
+			//TODO: do something with the response?
+			_, err := (&http.Client{}).Do(remoteReq)
+
+			if err != nil {
+				println(err.Error())
+			}
+		} else {
 			println(err.Error())
 		}
 	}
