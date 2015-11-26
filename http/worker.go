@@ -18,6 +18,8 @@ var worker = func(couchUrl string, ch chan string) {
 			return
 		}
 
+		fmt.Printf("Processing: %s\n", input)
+
 		var inputJson map[string]interface{}
 		err := json.NewDecoder(strings.NewReader(input)).Decode(&inputJson)
 
